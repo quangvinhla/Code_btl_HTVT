@@ -1,18 +1,12 @@
 """
 GA_multiobjective.py
-Multi-objective Genetic Algorithm for QoS-aware IoT Routing
-Objectives: Delay ↓, Energy ↓, (1-PDR) ↓
 """
-
 import random
 import networkx as nx
 from typing import List, Tuple
 import pickle
-
 # ================= CONFIG =================
-GRAPH_PATH = "./out/iot_graph100.gpickle"
-
-
+GRAPH_PATH = "./out/iot_graph75.gpickle"
 POP_SIZE = 30
 N_GEN = 30
 TOURNAMENT_K = 2
@@ -24,8 +18,6 @@ ALPHA = 0.4
 BETA = 0.3
 GAMMA = 0.3
 # ==========================================
-
-
 # ---------- LOAD GRAPH ----------
 def load_graph(path: str) -> nx.Graph:
     print("Loading IoT graph...")
@@ -33,7 +25,6 @@ def load_graph(path: str) -> nx.Graph:
         G = pickle.load(f)
     print(f"Nodes: {G.number_of_nodes()}, Edges: {G.number_of_edges()}")
     return G
-
 # ===== LOAD SOURCE & TARGET =====
 with open("./out/source_target.txt") as f:
     SRC, DST = map(int, f.read().split(","))
@@ -44,7 +35,6 @@ print(f"Using fixed source-target: {SRC} -> {DST}")
 def path_metrics(G: nx.Graph, path: List[int]) -> Tuple[float, float, float]:
     delay = energy = 0.0
     pdr = 1.0
-
     for i in range(len(path) - 1):
         if not G.has_edge(path[i], path[i + 1]):
             return 1e6, 1e6, 0.0
@@ -55,7 +45,6 @@ def path_metrics(G: nx.Graph, path: List[int]) -> Tuple[float, float, float]:
         pdr *= e["pdr"]
 
     return delay, energy, pdr
-
 
 def composite_cost(delay, energy, pdr):
     return ALPHA * delay + BETA * energy + GAMMA * (1 - pdr)
@@ -76,9 +65,6 @@ def fitness_vector(G, path):
     energy_norm = energy / 50.0
     pdr_loss    = 1 - pdr
     return (delay_norm, energy_norm, pdr_loss)
-
-
-
 
 # ---------- GA OPERATORS ----------
 def tournament_selection(pop, fits):
@@ -190,7 +176,7 @@ for p, f in final_fits:
     if not any(dominates(f2, f) for _, f2 in final_fits if f2 != f):
         final_pareto.append(p)
 
-final_pareto = final_pareto[:5]   # chỉ in nghiệm mạnh
+final_pareto = final_pareto[:5]   
 
 for idx, p in enumerate(final_pareto):
     delay, energy, pdr = path_metrics(G, p)
@@ -203,7 +189,7 @@ for idx, p in enumerate(final_pareto):
     print(f"End-to-end PDR  : {pdr:.4f}")
     print(f"Composite Cost  : {cost:.4f}")
 
-GA_PARETO_PATH = "./out/ga_pareto_paths100.pkl"
+GA_PARETO_PATH = "./out/ga_pareto_paths75.pkl"
 
 with open(GA_PARETO_PATH, "wb") as f:
     pickle.dump(final_pareto, f)
