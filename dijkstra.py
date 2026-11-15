@@ -1,49 +1,30 @@
 """
 dijkstra.py
-
-File 2: Dijkstra Initialization cho mô hình Hybrid Routing IoT
-- Load graph IoT đã xây dựng (node-link-weight)
-- Tìm đường đi tối ưu QoS bằng Dijkstra
-- Tính metric QoS của path
-- Vẽ và lưu hình đường đi
-- Xuất path cho GA / PSO
 """
 import math
 import random
 import matplotlib
-matplotlib.use("Agg")   # backend chỉ để lưu ảnh
+matplotlib.use("Agg")   
 import matplotlib.pyplot as plt
-
 import os
 import pickle
 import networkx as nx
 import matplotlib.pyplot as plt
 from typing import List, Dict, Tuple
-
-
 # =========================
 # CONFIG
-# =========================
-GRAPH_PATH = "./out/iot_graph100.gpickle"
-SAVE_FIG_PATH = "./out/dijkstra_path100.png"
-
-
+GRAPH_PATH = "./out/iot_graph75.gpickle"
+SAVE_FIG_PATH = "./out/dijkstra_path75.png"
 # =========================
 # LOAD GRAPH
-# =========================
 def load_graph(path: str) -> nx.Graph:
     if not os.path.exists(path):
         raise FileNotFoundError(f"Graph file not found: {path}")
-
     with open(path, "rb") as f:
         G = pickle.load(f)
-
     return G
-
-
 # =========================
 # DIJKSTRA ROUTING
-# =========================
 def dijkstra_path(
     G: nx.Graph,
     source: int,
@@ -51,8 +32,6 @@ def dijkstra_path(
     weight: str = "cost"
 ) -> List[int]:
     return nx.shortest_path(G, source, target, weight=weight)
-
-
 # =========================
 # PATH METRICS
 # =========================
@@ -63,7 +42,7 @@ def compute_path_metrics(
     total_cost = 0.0
     total_delay = 0.0
     total_energy = 0.0
-    success_prob = 1.0  # PDR = product of link PDRs
+    success_prob = 1.0  
 
     for i in range(len(path) - 1):
         u, v = path[i], path[i + 1]
@@ -127,14 +106,11 @@ def get_reasonable_source_target(G, percentile=0.8):
         d = math.dist(pos[source], coord)
         distances.append((d, node))
 
-    # sắp xếp theo khoảng cách tăng dần
     distances.sort(key=lambda x: x[0])
 
-    # lấy nhóm xa nhất (top percentile)
     k = int(len(distances) * percentile)
     candidate_nodes = distances[k:]
 
-    # chọn ngẫu nhiên 1 node trong nhóm xa
     _, target = random.choice(candidate_nodes)
 
     return source, target
@@ -166,12 +142,11 @@ if __name__ == "__main__":
     print(f"Total Delay  : {metrics['delay']:.2f} ms")
     print(f"Total Energy : {metrics['energy']:.2f} mJ")
     print(f"End-to-end PDR: {metrics['pdr']:.4f}")
-    SAVE_RESULT_PATH = "./out/dijkstra_paths100.pkl"
+
+    SAVE_RESULT_PATH = "./out/dijkstra_paths75.pkl"
     print("\nVisualizing path...")
     visualize_dijkstra_path(G, path, SAVE_FIG_PATH)
-    # =========================
-    # SAVE RESULT FOR SIMULATION
-    # =========================
+
     result = {
         "path": path,
         "delay": metrics["delay"],
