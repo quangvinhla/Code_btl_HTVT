@@ -1,36 +1,26 @@
 """
-simulate100.py
-- Tính giá trị trung bình đại diện cho trường hợp 100 node
-- So sánh: Dijkstra vs GA vs Hybrid PSO–GA
+simulate75.py
 """
-
 import pickle
 import numpy as np
 import os
 import networkx as nx
-
 # ==============================
 # CONFIG
 # ==============================
-GRAPH_PATH = "./out/iot_graph100.gpickle"
-
+GRAPH_PATH = "./out/iot_graph75.gpickle"
 FILES = {
-    "Dijkstra": "./out/dijkstra_paths100.pkl",            # dict
-    "GA": "./out/ga_pareto_paths100.pkl",            # list[path]
-    "Hybrid_PSO_GA": "./out/hybrid_pso_ga_paths100.pkl"  # list[path]
+    "Dijkstra": "./out/dijkstra_paths75.pkl",         
+    "GA": "./out/ga_pareto_paths75.pkl",          
+    "Hybrid_PSO_GA": "./out/hybrid_pso_ga_paths75.pkl"  
 }
-
-OUTPUT_FILE = "./out/simulation100_results.pkl"
-
-
+OUTPUT_FILE = "./out/simulation75_results.pkl"
 # ==============================
 # LOAD GRAPH
 # ==============================
 def load_graph():
     with open(GRAPH_PATH, "rb") as f:
         return pickle.load(f)
-
-
 # ==============================
 # METRICS
 # ==============================
@@ -49,8 +39,6 @@ def path_metrics(G, path):
         "energy": energy,
         "pdr": pdr
     }
-
-
 def compute_average(metrics_list):
     return {
         "avg_delay": float(np.mean([m["delay"] for m in metrics_list])),
@@ -64,12 +52,12 @@ def compute_average(metrics_list):
 # MAIN
 # ==============================
 def main():
-    print("Simulating 100-node results (AVERAGE METRICS)\n")
+    print("Simulating 75-node results (AVERAGE METRICS)\n")
 
     G = load_graph()
 
     summary = {
-        "nodes": 100,
+        "nodes": 75,
         "methods": {}
     }
 
@@ -82,9 +70,6 @@ def main():
 
         metrics_list = []
 
-        # --------------------------
-        # Dijkstra: đã là metrics
-        # --------------------------
         if method == "Dijkstra":
             metrics_list.append({
                 "delay": data["delay"],
@@ -92,9 +77,6 @@ def main():
                 "pdr": data["pdr"]
             })
 
-        # --------------------------
-        # GA / Hybrid: list path
-        # --------------------------
         else:
             for path in data:
                 metrics_list.append(path_metrics(G, path))
@@ -108,13 +90,10 @@ def main():
         print(f"  Energy : {avg['avg_energy']:.4f}")
         print(f"  PDR    : {avg['avg_pdr']:.4f}\n")
 
-    # ==========================
-    # SAVE RESULT
-    # ==========================
     with open(OUTPUT_FILE, "wb") as f:
         pickle.dump(summary, f)
 
-    print(f"Saved averaged 100-node results to {OUTPUT_FILE}")
+    print(f"Saved averaged 75-node results to {OUTPUT_FILE}")
 
 
 if __name__ == "__main__":
