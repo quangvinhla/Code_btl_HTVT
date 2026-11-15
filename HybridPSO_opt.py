@@ -2,11 +2,9 @@ import random
 import pickle
 import networkx as nx
 import copy
-
 # ================== CONFIG ==================
-GRAPH_PATH = "./out/iot_graph100.gpickle"
-GA_PARETO_PATH = "./out/ga_pareto_paths100.pkl"
-
+GRAPH_PATH = "./out/iot_graph75.gpickle"
+GA_PARETO_PATH = "./out/ga_pareto_paths75.pkl"
 N_PARTICLES = 20
 N_ITER = 30
 
@@ -14,20 +12,15 @@ W = 0.7
 C1 = 1.5
 C2 = 1.5
 
-ALPHA = 0.4   # delay
-BETA = 0.3    # energy
-GAMMA = 0.3   # packet loss
-
+ALPHA = 0.4  
+BETA = 0.3    
+GAMMA = 0.3   
 PENALTY_LAMBDA = 1000
 # ===========================================
-
-
 # ---------- LOAD GRAPH ----------
 def load_graph(path):
     with open(path, "rb") as f:
         return pickle.load(f)
-
-
 # ---------- PATH METRICS ----------
 def path_metrics(G, path):
     delay, energy, pdr = 0.0, 0.0, 1.0
@@ -40,16 +33,12 @@ def path_metrics(G, path):
         pdr *= e["pdr"]
     return delay, energy, pdr
 
-
 # ---------- FITNESS WITH PENALTY ----------
 def fitness(G, path):
     d, e, pdr = path_metrics(G, path)
-
-    # QoS thresholds (example)
     D_MAX = 80
     E_MAX = 20
     P_MIN = 0.6
-
     penalty = 0
     if d > D_MAX:
         penalty += (d - D_MAX)
@@ -118,7 +107,6 @@ if __name__ == "__main__":
         print(f"Iteration {it:02d}")
 
         for i in range(len(swarm)):
-            # PSO movement
             new_path = pso_move(G, swarm[i], pbest[i], random.choice(pbest))
 
             f_new = fitness(G, new_path)
@@ -126,13 +114,9 @@ if __name__ == "__main__":
 
             if f_new < f_old:
                 swarm[i] = new_path
-
-            # Update pBest
             if f_new < pbest_fit[i]:
                 pbest[i] = new_path
                 pbest_fit[i] = f_new
-
-        # Update archive (Pareto)
         for p in swarm:
             f = fitness(G, p)
             dominated = False
@@ -142,8 +126,6 @@ if __name__ == "__main__":
                     break
             if not dominated:
                 archive.append(p)
-
-        # limit archive
         archive = archive[:10]
 
         print(f"  Archive size = {len(archive)}")
@@ -156,7 +138,7 @@ if __name__ == "__main__":
         print("Path:", p)
         print(f"Delay={d:.2f}, Energy={e:.2f}, PDR={pr:.4f}")
 
-    with open("./out/hybrid_pso_ga_paths100.pkl", "wb") as f:
+    with open("./out/hybrid_pso_ga_paths75.pkl", "wb") as f:
         pickle.dump(archive, f)
 
     print("\nSaved hybrid PSO-GA results.")
